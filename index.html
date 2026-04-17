@@ -3,794 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Honeywell Binstock Program Scorecard</title>
+<title>Honeywell Global Program &mdash; Executive Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
-
-  :root {
-    --bg:        #eef1f6;
-    --surface:   #ffffff;
-    --border:    #c8d1de;
-    --accent:    #025f99;
-    --green:     #15803d;
-    --yellow:    #b45309;
-    --red:       #b91c1c;
-    --purple:    #6d28d9;
-    --muted:     #374151;
-    --text:      #0f172a;
-    --subtext:   #1e293b;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    min-height: 100vh;
-    padding: 0;
-    overflow-x: hidden;
-  }
-
-  /* ── Header ── */
-  .header {
-    background: linear-gradient(135deg, #f0f4f8 0%, #e1eaf5 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 28px 40px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(3,105,161,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-left h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-  .header-left p {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.03em;
-    margin-top: 4px;
-  }
-  .header-right {
-    text-align: right;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.02em;
-    line-height: 1.7;
-  }
-  .header-right .site-tag {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--accent);
-    letter-spacing: 0.06em;
-  }
-
-  /* ── Definition Banner ── */
-  .def-banner {
-    background: rgba(2,95,153,0.05);
-    border-bottom: 1px solid var(--border);
-    padding: 11px 40px;
-    display: flex;
-    gap: 32px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.01em;
-  }
-  .def-banner span { color: var(--subtext); }
-  .def-pill {
-    display: inline-block;
-    padding: 2px 9px;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-right: 6px;
-  }
-  .pill-active { background: rgba(22,163,74,0.10); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
-  .pill-inactive { background: rgba(107,114,128,0.10); color: var(--muted); border: 1px solid rgba(107,114,128,0.3); }
-
-  /* ── Layout ── */
-  .dashboard {
-    padding: 32px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-  }
-
-  .row {
-    display: grid;
-    gap: 20px;
-  }
-  .row-4 { grid-template-columns: repeat(4, 1fr); }
-  .row-3 { grid-template-columns: repeat(3, 1fr); }
-  .row-2 { grid-template-columns: repeat(2, 1fr); }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px 22px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .card:hover { border-color: #b0bfd4; }
-  .card-accent-top {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .card-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .card-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 36px;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .card-sub {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-  .card-sub strong { color: var(--subtext); font-weight: 700; }
-
-  /* ── Section headers ── */
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 4px;
-  }
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--subtext);
-  }
-  .section-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ── Fill Rate Card (wide) ── */
-  .fill-rate-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  .fill-rate-side {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .fill-rate-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .fill-rate-big {
-    font-family: 'Syne', sans-serif;
-    font-size: 52px;
-    font-weight: 800;
-    color: var(--green);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .fill-rate-sub {
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .divider-v {
-    width: 1px;
-    background: var(--border);
-    margin: 0 8px;
-  }
-  .fill-bar-track {
-    height: 6px;
-    background: rgba(0,0,0,0.08);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 4px;
-  }
-  .fill-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), #4ade80);
-    border-radius: 3px;
-    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  /* ── Two-lens comparison ── */
-  .lens-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px 22px;
-    position: relative;
-    overflow: hidden;
-  }
-  .lens-tag {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 4px 11px;
-    border-radius: 3px;
-    margin-bottom: 12px;
-  }
-  .lens-total { background: rgba(109,40,217,0.08); color: var(--purple); border: 1px solid rgba(109,40,217,0.25); }
-  .lens-active { background: rgba(21,128,61,0.08); color: var(--green); border: 1px solid rgba(21,128,61,0.25); }
-  .lens-metrics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .lens-metric-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .lens-metric-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .lens-metric-count {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* ── Risk gauge ── */
-  .risk-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.07);
-  }
-  .risk-row:last-child { border-bottom: none; }
-  .risk-label { font-size: 13px; font-weight: 600; color: var(--subtext); flex: 1; }
-  .risk-bar-wrap { width: 120px; }
-  .risk-bar-bg { height: 6px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden; }
-  .risk-bar-inner { height: 100%; border-radius: 3px; }
-  .risk-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; width: 52px; text-align: right; }
-  .risk-count { font-size: 12px; font-weight: 600; color: var(--muted); width: 56px; text-align: right; }
-
-  /* ── Contract donut ── */
-  .contract-layout {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-  .donut-wrap { position: relative; flex-shrink: 0; }
-  .donut-center {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-  }
-  .donut-center-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent);
-  }
-  .donut-center-lbl {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--subtext);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .contract-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-  .legend-row { display: flex; align-items: center; gap: 10px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-  .legend-name { font-size: 13px; font-weight: 600; color: var(--subtext); flex: 1; }
-  .legend-count { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
-  .legend-pct { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 4px; }
-
-  /* ── Bin Activity ── */
-  .activity-visual {
-    display: flex;
-    gap: 3px;
-    flex-wrap: wrap;
-    margin: 12px 0 14px;
-  }
-  .dot-bin { width: 7px; height: 7px; border-radius: 1px; flex-shrink: 0; }
-  .dot-active { background: var(--green); opacity: 0.75; }
-  .dot-inactive { background: var(--muted); opacity: 0.35; }
-  .activity-legend { display: flex; gap: 20px; }
-  .act-item { display: flex; align-items: center; gap: 8px; }
-  .act-dot { width: 10px; height: 10px; border-radius: 2px; }
-  .act-label { font-size: 13px; font-weight: 600; color: var(--subtext); }
-  .act-num { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
-  .act-pct { font-size: 12px; font-weight: 600; color: var(--muted); }
-
-  /* ── Risk / Past Due ── */
-  .pastdue-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 8px;
-  }
-  .pd-block {
-    background: rgba(185,28,28,0.04);
-    border: 1px solid rgba(185,28,28,0.2);
-    border-radius: 6px;
-    padding: 14px 16px;
-  }
-  .pd-block-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .pd-block-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--red);
-    line-height: 1;
-  }
-  .pd-block-sub { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 4px; }
-
-  /* colors */
-  .c-green { color: var(--green); }
-  .c-red { color: var(--red); }
-  .c-yellow { color: var(--yellow); }
-  .c-accent { color: var(--accent); }
-  .c-purple { color: var(--purple); }
-  .c-muted { color: var(--muted); }
-
-  .bg-green { background: var(--green); }
-  .bg-red { background: var(--red); }
-  .bg-yellow { background: var(--yellow); }
-  .bg-accent { background: var(--accent); }
-  .bg-purple { background: var(--purple); }
-  .bg-muted { background: var(--muted); }
-
-  /* ── Footer ── */
-  .footer {
-    padding: 16px 40px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.02em;
-  }
-
-  @media (max-width: 900px) {
-    .row-4 { grid-template-columns: repeat(2, 1fr); }
-    .row-3 { grid-template-columns: 1fr 1fr; }
-    .dashboard { padding: 20px; }
-    .header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 8px; }
-    .def-banner { flex-direction: column; gap: 6px; }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f2;padding:24px;color:#2C2C2A}
+.dash{max-width:1200px;margin:0 auto}
+.hdr{background:#0D1B3E;border-radius:10px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.hdr-title{font-size:20px;font-weight:500;color:#fff}
+.hdr-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-top:3px}
+.hdr-badges{display:flex;gap:10px;flex-wrap:wrap}
+.hdr-badge{background:rgba(255,255,255,0.12);border-radius:6px;padding:8px 16px;text-align:center;min-width:100px}
+.hdr-badge-val{font-size:18px;font-weight:500;color:#fff}
+.hdr-badge-lbl{font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px}
+.sl{font-size:10px;font-weight:500;color:#5F5E5A;text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:800px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.kpi-grid-2{grid-template-columns:1fr}}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+.kpi{background:#fff;border-radius:8px;padding:14px 16px;border:.5px solid #D3D1C7}
+.kpi-label{font-size:11px;color:#888780;margin-bottom:4px}
+.kpi-val{font-size:21px;font-weight:500;color:#2C2C2A;line-height:1.2}
+.kpi-val.g{color:#0F6E56}.kpi-val.r{color:#993C1D}.kpi-val.b{color:#185FA5}.kpi-val.a{color:#854F0B}
+.kpi-sub{font-size:11px;color:#888780;margin-top:4px}
+.kpi-sub.up{color:#0F6E56}.kpi-sub.dn{color:#993C1D}
+.cg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+@media(max-width:800px){.cg{grid-template-columns:1fr}}
+.cb{background:#fff;border:.5px solid #D3D1C7;border-radius:10px;padding:16px 18px}
+.ct{font-size:13px;font-weight:500;color:#2C2C2A;margin-bottom:3px}
+.cs{font-size:11px;color:#888780;margin-bottom:10px}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#5F5E5A}
+.lsq{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:3px;vertical-align:middle}
+.divider{border:none;border-top:1px solid #D3D1C7;margin:22px 0 6px}
+.fn{background:#EBF3FC;border-radius:8px;padding:12px 16px;font-size:12px;color:#0C447C;border:.5px solid #B5D4F4;margin-top:20px}
+.rt{font-size:11px;color:#888780;text-align:right;margin-top:14px}
 </style>
 </head>
 <body>
+<div class="dash">
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <h1>Honeywell Binstock Program Scorecard</h1>
-    <p>Program Management · April 2026</p>
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Honeywell Global Program &mdash; Executive Dashboard</div>
+    <div class="hdr-sub">YTD 2026 &middot; As of April 17, 2026</div>
   </div>
-  <div class="header-right">
-    <div class="site-tag">HONEYWELL URBANA</div>
-    <div>BDS Account: Boeing Distribution Services</div>
-    <div>Source: Bin Map Rpt_Urbana · 3,564 Total Bins</div>
+  <div class="hdr-badges">
+    <div class="hdr-badge"><div class="hdr-badge-val">$49.8M</div><div class="hdr-badge-lbl">YTD Revenue</div></div>
+    <div class="hdr-badge"><div class="hdr-badge-val">26.4%</div><div class="hdr-badge-lbl">PGM %</div></div>
+    <div class="hdr-badge"><div class="hdr-badge-val">$7.9M</div><div class="hdr-badge-lbl">Past Due $</div></div>
+    <div class="hdr-badge"><div class="hdr-badge-val">4,675</div><div class="hdr-badge-lbl">Past Due Lines</div></div>
   </div>
 </div>
 
-<!-- DEFINITION BANNER -->
-<div class="def-banner">
-  <span>
-    <span class="def-pill pill-active">ACTIVE</span>
-    <span>Any scans recorded in the last 3 years (2023–2026)</span>
-  </span>
-  <span>
-    <span class="def-pill pill-inactive">INACTIVE</span>
-    <span>Zero scans in the same 3-year window — candidates for deletion/review</span>
-  </span>
-  <span style="margin-left:auto;">
-    <span>Stockout = bin flagged STOCKOUT · Past Due = open replenishment obligation past due date</span>
-  </span>
+<div class="sl">Revenue &amp; Margin Performance</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">YTD Revenue</div><div class="kpi-val g">$49.8M</div><div class="kpi-sub up">+$8.0M vs baseline plan ($41.8M)</div></div>
+  <div class="kpi"><div class="kpi-label">vs 2025 same period</div><div class="kpi-val g">+$10.9M</div><div class="kpi-sub up">2025 YTD was $38.9M &middot; +28.0% YoY</div></div>
+  <div class="kpi"><div class="kpi-label">Program Gross Margin</div><div class="kpi-val g">26.4%</div><div class="kpi-sub up">+230bps above baseline (24.1%)</div></div>
+  <div class="kpi"><div class="kpi-label">Total Book Value</div><div class="kpi-val b">$99.4M</div><div class="kpi-sub">Backlog: $91.1M &middot; 26,524 lines</div></div>
 </div>
 
-<div class="dashboard">
-
-  <!-- ROW 1: Top KPIs -->
-  <div>
-    <div class="section-header"><span class="section-title">Site Overview</span><div class="section-line"></div></div>
-    <div style="margin-top:12px;" class="row row-4">
-
-      <div class="card">
-        <div class="card-accent-top" style="background: var(--accent);"></div>
-        <div class="card-label">Total Bin Map</div>
-        <div class="card-value c-accent">3,564</div>
-        <div class="card-sub">Complete site footprint — all statuses</div>
-      </div>
-
-      <div class="card">
-        <div class="card-accent-top" style="background: var(--green);"></div>
-        <div class="card-label">Active Bins</div>
-        <div class="card-value c-green">2,434</div>
-        <div class="card-sub"><strong>68.3%</strong> of total map · scanned ≥ 1× in 3 yrs</div>
-      </div>
-
-      <div class="card">
-        <div class="card-accent-top" style="background: var(--muted);"></div>
-        <div class="card-label">Inactive Bins</div>
-        <div class="card-value" style="color:var(--subtext);">1,130</div>
-        <div class="card-sub"><strong>31.7%</strong> of total map · zero scans in 3 yrs</div>
-      </div>
-
-      <div class="card">
-        <div class="card-accent-top" style="background: var(--red);"></div>
-        <div class="card-label">Past Due Bins</div>
-        <div class="card-value c-red">43</div>
-        <div class="card-sub"><strong>1.21%</strong> of total · <strong>41</strong> in active map</div>
-      </div>
-
-    </div>
+<div class="cg">
+  <div class="cb">
+    <div class="ct">YTD Revenue vs Baseline Plan ($M)</div>
+    <div class="cs">Cumulative 2026 &middot; +$8.0M vs baseline plan ($41.8M)</div>
+    <div class="leg"><span><span class="lsq" style="background:#185FA5"></span>Actual revenue</span><span><span class="lsq" style="background:#AAAAAA;border:1px dashed #888"></span>Baseline plan</span></div>
+    <div style="position:relative;width:100%;height:240px"><canvas id="revChart" role="img" aria-label="YTD Revenue vs Baseline Plan"></canvas></div>
   </div>
-
-  <!-- ROW 2: Fill Rate + Stockout dual-lens -->
-  <div>
-    <div class="section-header"><span class="section-title">Fill Rate & Stockout — Two Lenses</span><div class="section-line"></div></div>
-    <div style="margin-top:12px;" class="row row-2">
-
-      <!-- Total Bin Map lens -->
-      <div class="lens-card">
-        <div class="lens-tag lens-total">Lens 1 — Complete Bin Map (All 3,564)</div>
-        <div class="lens-metrics">
-          <div>
-            <div class="lens-metric-label">Fill Rate</div>
-            <div class="lens-metric-value c-green">99.83%</div>
-            <div class="lens-metric-count">3,558 of 3,564 bins stocked</div>
-            <div class="fill-bar-track" style="margin-top:8px;">
-              <div class="fill-bar-fill" style="width: 99.83%;"></div>
-            </div>
-          </div>
-          <div>
-            <div class="lens-metric-label">Stockouts</div>
-            <div class="lens-metric-value c-red">6</div>
-            <div class="lens-metric-count">0.17% of total map</div>
-            <div style="margin-top:10px; font-size:13px; font-weight:600; color:var(--muted); line-height:1.5;">
-              Risk impact is diluted when inactive bins are included in the denominator.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Active-only lens -->
-      <div class="lens-card" style="border-color: rgba(22,163,74,0.25);">
-        <div class="lens-tag lens-active">Lens 2 — Active Bins Only (2,434)</div>
-        <div class="lens-metrics">
-          <div>
-            <div class="lens-metric-label">Fill Rate</div>
-            <div class="lens-metric-value c-green">99.75%</div>
-            <div class="lens-metric-count">2,428 of 2,434 active bins stocked</div>
-            <div class="fill-bar-track" style="margin-top:8px;">
-              <div class="fill-bar-fill" style="width: 99.75%;"></div>
-            </div>
-          </div>
-          <div>
-            <div class="lens-metric-label">Stockouts</div>
-            <div class="lens-metric-value c-red">6</div>
-            <div class="lens-metric-count">0.25% of active map</div>
-            <div style="margin-top:10px; font-size:13px; font-weight:600; color:var(--muted); line-height:1.5;">
-              True operational fill rate — excludes dormant bins not driving demand.
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+  <div class="cb">
+    <div class="ct">PGM % vs Baseline Plan</div>
+    <div class="cs">+230bps above baseline (24.1%)</div>
+    <div class="leg"><span><span class="lsq" style="background:#0F7A58"></span>Actual PGM %</span><span><span class="lsq" style="background:#AAAAAA;border:1px dashed #888"></span>Baseline plan</span></div>
+    <div style="position:relative;width:100%;height:240px"><canvas id="pgmChart" role="img" aria-label="PGM % vs Baseline Plan"></canvas></div>
   </div>
-
-  <!-- ROW 3: Past Due Risk + Bin Activity -->
-  <div>
-    <div class="section-header"><span class="section-title">Past Due Risk Exposure</span><div class="section-line"></div></div>
-    <div style="margin-top:12px;" class="row row-2">
-
-      <div class="card">
-        <div class="card-label">Past Due Bins — Dual-Lens Risk View</div>
-        <div class="pastdue-split">
-          <div class="pd-block">
-            <div class="pd-block-label">vs. Total Map</div>
-            <div class="pd-block-val">1.21%</div>
-            <div class="pd-block-sub">43 bins · of 3,564 total</div>
-          </div>
-          <div class="pd-block">
-            <div class="pd-block-label">vs. Active Only</div>
-            <div class="pd-block-val">1.68%</div>
-            <div class="pd-block-sub">41 bins · of 2,434 active</div>
-          </div>
-        </div>
-        <div style="margin-top:12px; font-size:13px; font-weight:600; color:var(--muted); line-height:1.6; border-top:1px solid var(--border); padding-top:10px;">
-          <span style="color:var(--red);">▲ Active-lens risk is 39% higher</span> than total-map view. Reporting against total map understates exposure — active-only lens is the operationally honest metric for leadership.
-        </div>
-      </div>
-
-      <!-- Bin Activity Breakdown -->
-      <div class="card">
-        <div class="card-label">Bin Activity Breakdown</div>
-        <div class="activity-visual" id="activityDots"></div>
-        <div class="activity-legend">
-          <div class="act-item">
-            <div class="act-dot" style="background:var(--green);"></div>
-            <div>
-              <div style="display:flex; align-items:baseline; gap:5px;">
-                <span class="act-num c-green">2,434</span>
-                <span class="act-pct">(68.3%)</span>
-              </div>
-              <div class="act-label">Active — scanned in last 3 yrs</div>
-            </div>
-          </div>
-          <div class="act-item">
-            <div class="act-dot bg-muted"></div>
-            <div>
-              <div style="display:flex; align-items:baseline; gap:5px;">
-                <span class="act-num" style="color:var(--subtext);">1,130</span>
-                <span class="act-pct">(31.7%)</span>
-              </div>
-              <div class="act-label">Inactive — zero scans in 3 yrs</div>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:10px; font-size:13px; font-weight:600; color:var(--muted); line-height:1.6; border-top:1px solid var(--border); padding-top:10px;">
-          <span style="color:var(--yellow);">827 bins flagged DELETE</span> · 300 flagged for PO/BOM Review — inactive population represents significant footprint recapture opportunity.
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ROW 4: Contract Status -->
-  <div>
-    <div class="section-header"><span class="section-title">Contract Status</span><div class="section-line"></div></div>
-    <div style="margin-top:12px;" class="row row-3">
-
-      <!-- All bins contract -->
-      <div class="card" style="grid-column: span 1;">
-        <div class="card-label">Contract Status — Total Bin Map</div>
-        <div class="contract-layout" style="margin-top:10px;">
-          <div class="donut-wrap">
-            <svg width="110" height="110" viewBox="0 0 110 110">
-              <circle cx="55" cy="55" r="42" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="14"/>
-              <!-- On-Contract Priced: 3486/3564 = 97.8% = 352.1deg -->
-              <circle cx="55" cy="55" r="42" fill="none" stroke="#22c55e" stroke-width="14"
-                stroke-dasharray="263.9 263.9"
-                stroke-dashoffset="0"
-                transform="rotate(-90 55 55)" opacity="0.85"/>
-              <!-- Off-Contract: 65/3564 = 1.82% = 6.57deg -->
-              <circle cx="55" cy="55" r="42" fill="none" stroke="#ef4444" stroke-width="14"
-                stroke-dasharray="4.8 259.1"
-                stroke-dashoffset="-257.9"
-                transform="rotate(-90 55 55)" opacity="0.9"/>
-              <!-- Unpriced: 13/3564 = 0.36% -->
-              <circle cx="55" cy="55" r="42" fill="none" stroke="#f59e0b" stroke-width="14"
-                stroke-dasharray="0.95 263.0"
-                stroke-dashoffset="-262.8"
-                transform="rotate(-90 55 55)" opacity="0.9"/>
-            </svg>
-            <div class="donut-center">
-              <div class="donut-center-val">97.8%</div>
-              <div class="donut-center-lbl">On-Contract</div>
-            </div>
-          </div>
-          <div class="contract-legend">
-            <div class="legend-row">
-              <div class="legend-dot bg-green"></div>
-              <div class="legend-name">On-Contract · Priced</div>
-              <span class="legend-count c-green">3,486</span>
-              <span class="legend-pct">97.8%</span>
-            </div>
-            <div class="legend-row">
-              <div class="legend-dot bg-red"></div>
-              <div class="legend-name">Off-Contract</div>
-              <span class="legend-count c-red">65</span>
-              <span class="legend-pct">1.82%</span>
-            </div>
-            <div class="legend-row">
-              <div class="legend-dot bg-yellow"></div>
-              <div class="legend-name">On-Contract · Unpriced</div>
-              <span class="legend-count c-yellow">13</span>
-              <span class="legend-pct">0.36%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Active bins contract -->
-      <div class="card">
-        <div class="card-label">Contract Status — Active Bins Only</div>
-        <div class="contract-layout" style="margin-top:10px;">
-          <div class="donut-wrap">
-            <svg width="110" height="110" viewBox="0 0 110 110">
-              <circle cx="55" cy="55" r="42" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="14"/>
-              <!-- Priced: 2415/2434 = 99.2% -->
-              <circle cx="55" cy="55" r="42" fill="none" stroke="#22c55e" stroke-width="14"
-                stroke-dasharray="261.8 2.1"
-                stroke-dashoffset="0"
-                transform="rotate(-90 55 55)" opacity="0.85"/>
-              <!-- Off: 19/2434 = 0.78% -->
-              <circle cx="55" cy="55" r="42" fill="none" stroke="#ef4444" stroke-width="14"
-                stroke-dasharray="2.06 261.9"
-                stroke-dashoffset="-261.8"
-                transform="rotate(-90 55 55)" opacity="0.9"/>
-            </svg>
-            <div class="donut-center">
-              <div class="donut-center-val">99.2%</div>
-              <div class="donut-center-lbl">On-Contract</div>
-            </div>
-          </div>
-          <div class="contract-legend">
-            <div class="legend-row">
-              <div class="legend-dot bg-green"></div>
-              <div class="legend-name">On-Contract · Priced</div>
-              <span class="legend-count c-green">2,415</span>
-              <span class="legend-pct">99.2%</span>
-            </div>
-            <div class="legend-row">
-              <div class="legend-dot bg-red"></div>
-              <div class="legend-name">Off-Contract</div>
-              <span class="legend-count c-red">19</span>
-              <span class="legend-pct">0.78%</span>
-            </div>
-            <div class="legend-row" style="opacity:0.35;">
-              <div class="legend-dot" style="background:var(--muted);"></div>
-              <div class="legend-name">Unpriced (in inactive)</div>
-              <span class="legend-count">—</span>
-              <span class="legend-pct"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contract risk summary -->
-      <div class="card">
-        <div class="card-label">Contract Risk Summary</div>
-        <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
-
-          <div class="risk-row">
-            <div class="risk-label">Off-Contract (Total Map)</div>
-            <div class="risk-bar-wrap">
-              <div class="risk-bar-bg">
-                <div class="risk-bar-inner bg-red" style="width:1.82%;"></div>
-              </div>
-            </div>
-            <div class="risk-value c-red">1.82%</div>
-            <div class="risk-count c-muted">65 bins</div>
-          </div>
-
-          <div class="risk-row">
-            <div class="risk-label">Off-Contract (Active Only)</div>
-            <div class="risk-bar-wrap">
-              <div class="risk-bar-bg">
-                <div class="risk-bar-inner bg-red" style="width:0.78%;"></div>
-              </div>
-            </div>
-            <div class="risk-value c-red">0.78%</div>
-            <div class="risk-count c-muted">19 bins</div>
-          </div>
-
-          <div class="risk-row">
-            <div class="risk-label">Unpriced (Total Map)</div>
-            <div class="risk-bar-wrap">
-              <div class="risk-bar-bg">
-                <div class="risk-bar-inner bg-yellow" style="width:0.36%;"></div>
-              </div>
-            </div>
-            <div class="risk-value c-yellow">0.36%</div>
-            <div class="risk-count c-muted">13 bins</div>
-          </div>
-
-          <div class="risk-row">
-            <div class="risk-label">Past Due (Active Lens)</div>
-            <div class="risk-bar-wrap">
-              <div class="risk-bar-bg">
-                <div class="risk-bar-inner bg-red" style="width:1.68%;"></div>
-              </div>
-            </div>
-            <div class="risk-value c-red">1.68%</div>
-            <div class="risk-count c-muted">41 bins</div>
-          </div>
-
-          <div class="risk-row">
-            <div class="risk-label">Stockout (Active Lens)</div>
-            <div class="risk-bar-wrap">
-              <div class="risk-bar-bg">
-                <div class="risk-bar-inner bg-red" style="width:0.25%;"></div>
-              </div>
-            </div>
-            <div class="risk-value c-red">0.25%</div>
-            <div class="risk-count c-muted">6 bins</div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
-  <span>Boeing Distribution Services · Program Management · Honeywell Aerospace Account</span>
-  <span>Data: Urbana Bin Map · April 2026 · Active = any scan 2023–2026 · Inactive = 0 scans same period</span>
+<hr class="divider">
+<div class="sl">Past Due Analysis &mdash; PO Orders (Planned Commitments)</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">PO Past Due Lines</div><div class="kpi-val r">2,780</div><div class="kpi-sub dn">of 28,047 total PO lines &middot; 9.9%</div></div>
+  <div class="kpi"><div class="kpi-label">PO Past Due $</div><div class="kpi-val r">$6.6M</div><div class="kpi-sub dn">84.0% of total past due dollars</div></div>
+  <div class="kpi"><div class="kpi-label">#1 Function Owner</div><div class="kpi-val r">SUPPLY CHAIN</div><div class="kpi-sub dn">1,072 lines &middot; $3.8M &middot; 56.9% of PO past due $</div></div>
+  <div class="kpi"><div class="kpi-label">#1 Customer at Risk</div><div class="kpi-val r">Engines</div><div class="kpi-sub dn">220 lines &middot; $2.8M &middot; 42.3% of PO past due $</div></div>
+</div>
+
+<div class="cg">
+  <div class="cb">
+    <div class="ct">PO Past Due by Function &mdash; Lines &amp; Dollars</div>
+    <div class="cs">ActionBy ownership &middot; who holds the execution miss</div>
+    <div class="leg"><span><span class="lsq" style="background:#4A3FBF"></span>$ impact</span><span><span class="lsq" style="background:rgba(61,170,132,0.85)"></span>line count</span></div>
+    <div style="position:relative;width:100%;height:280px"><canvas id="poFuncChart" role="img" aria-label="PO Past Due by Function"></canvas></div>
+  </div>
+  <div class="cb">
+    <div class="ct">PO Past Due by Site &mdash; Top 10</div>
+    <div class="cs">Financial impact per Honeywell site</div>
+    <div style="position:relative;width:100%;height:280px"><canvas id="poSiteChart" role="img" aria-label="PO Past Due by Site"></canvas></div>
+  </div>
+</div>
+
+<hr class="divider">
+<div class="sl">Past Due Analysis &mdash; Binstock Orders (Ad-Hoc Replenishment)</div>
+<div class="kpi-grid-2">
+  <div class="kpi"><div class="kpi-label">Binstock Past Due Lines</div><div class="kpi-val a">1,883</div><div class="kpi-sub">of 3,306 total Binstock lines &middot; 57.0%</div></div>
+  <div class="kpi"><div class="kpi-label">Binstock Past Due $</div><div class="kpi-val a">$1.3M</div><div class="kpi-sub">15.9% of total past due dollars</div></div>
+</div>
+
+<div class="cg">
+  <div class="cb">
+    <div class="ct">Binstock Past Due by Function &mdash; Lines &amp; Dollars</div>
+    <div class="cs">ActionBy ownership of bin replenishment misses</div>
+    <div class="leg"><span><span class="lsq" style="background:#4A3FBF"></span>$ impact</span><span><span class="lsq" style="background:rgba(61,170,132,0.85)"></span>line count</span></div>
+    <div style="position:relative;width:100%;height:260px"><canvas id="binFuncChart" role="img" aria-label="Binstock Past Due by Function"></canvas></div>
+  </div>
+  <div class="cb">
+    <div class="ct">Binstock Past Due by Site &mdash; Top 10</div>
+    <div class="cs">Line volume per site &middot; full bin map needed for rate analysis</div>
+    <div style="position:relative;width:100%;height:260px"><canvas id="binSiteChart" role="img" aria-label="Binstock Past Due by Site"></canvas></div>
+  </div>
+</div>
+
+<div class="fn"><strong>Note on Binstock:</strong> Binstock orders are ad-hoc scan-triggered replenishments under a 2-bin system, not planned commitments. Past due lines represent replenishment cycles that have not yet completed. A full bin map is needed to calculate true stockout rates by site. This analysis will be enhanced as that data becomes available.</div>
+<div class="rt">Last refreshed: April 17, 2026 &middot; Source: Working Honeywell KPI Dashboard.xlsx</div>
+
 </div>
 
 <script>
-  // Generate activity dot matrix (visual representation)
-  const container = document.getElementById('activityDots');
-  const active = 2434, inactive = 1130, total = 3564;
-  const dots = 150; // scaled representation
-  const activeDots = Math.round((active / total) * dots);
-  
-  for (let i = 0; i < dots; i++) {
-    const d = document.createElement('div');
-    d.className = 'dot-bin ' + (i < activeDots ? 'dot-active' : 'dot-inactive');
-    container.appendChild(d);
-  }
+Chart.register(ChartDataLabels);
+const gc='rgba(0,0,0,0.06)',tc='#5F5E5A';
 
-  // Animate fill bars on load
-  window.addEventListener('load', () => {
-    document.querySelectorAll('.fill-bar-fill').forEach(el => {
-      const w = el.style.width;
-      el.style.width = '0%';
-      requestAnimationFrame(() => {
-        setTimeout(() => { el.style.width = w; }, 100);
-      });
-    });
-  });
+new Chart(document.getElementById('revChart'),{type:'line',data:{labels:['Jan 06','Jan 12','Jan 28','Feb 02','Feb 03','Feb 09','Feb 10','Feb 17','Feb 19','Feb 20','Feb 23','Feb 24','Feb 25','Feb 26','Mar 02','Mar 03','Mar 04','Mar 05','Mar 09','Mar 12','Mar 13','Mar 16','Mar 17','Mar 18','Mar 19','Mar 23','Mar 27','Mar 30','Apr 13','Apr 15','Apr 16','Apr 17'],datasets:[
+  {label:'Actual',data:[0.62,2.37,10.83,13.45,13.68,16.0,16.17,20.82,22.69,23.22,23.97,24.54,25.87,26.37,27.4,27.71,27.71,29.87,30.93,32.38,33.17,34.52,34.97,36.0,36.58,37.67,40.41,41.5,47.45,48.35,49.14,49.85],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',fill:true,tension:0.3,pointRadius:3,borderWidth:2.5,
+    datalabels:{display:ctx=>[0,31].includes(ctx.dataIndex),anchor:'top',align:'top',color:'#185FA5',font:{size:10,weight:'500'},formatter:v=>'$'+v+'M'}},
+  {label:'Baseline',data:[0.62,null,null,null,null,null,null,16.33,16.91,17.22,18.99,18.99,19.26,19.72,21.53,21.53,24.33,24.86,25.91,27.5,28.03,28.56,28.56,28.6,30.14,31.2,33.29,33.81,39.96,40.59,41.21,41.83],borderColor:'#AAAAAA',borderDash:[5,3],tension:0.3,pointRadius:0,borderWidth:1.5,spanGaps:true,datalabels:{display:false}}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{x:{ticks:{color:tc,font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{color:gc}},
+           y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:gc}}}  }});
+
+new Chart(document.getElementById('pgmChart'),{type:'line',data:{labels:['Jan 06','Jan 12','Jan 28','Feb 02','Feb 03','Feb 09','Feb 10','Feb 17','Feb 19','Feb 20','Feb 23','Feb 24','Feb 25','Feb 26','Mar 02','Mar 03','Mar 04','Mar 05','Mar 09','Mar 12','Mar 13','Mar 16','Mar 17','Mar 18','Mar 19','Mar 23','Mar 27','Mar 30','Apr 13','Apr 15','Apr 16','Apr 17'],datasets:[
+  {label:'PGM',data:[27.7,7.5,32.4,30.2,28.5,27.1,26.7,28.2,28.2,28.1,28.1,28.2,28.5,28.4,28.6,28.5,28.7,29.0,29.2,28.8,28.2,27.4,27.2,27.2,26.8,26.7,26.3,26.5,26.5,26.5,26.5,26.4],borderColor:'#0F7A58',backgroundColor:'rgba(15,122,88,0.07)',fill:true,tension:0.3,pointRadius:3,borderWidth:2.5,
+    datalabels:{display:ctx=>[0,1,31].includes(ctx.dataIndex),anchor:'top',align:'top',color:'#0F7A58',font:{size:10,weight:'500'},formatter:v=>v+'%'}},
+  {label:'Baseline',data:[27.7,null,null,null,null,null,null,24.9,24.8,24.9,25.4,25.4,25.4,25.3,25.3,25.3,24.2,24.2,24.2,24.2,24.2,24.2,24.5,24.2,24.2,24.2,24.2,24.2,24.1,24.1,24.1,24.1],borderColor:'#AAAAAA',borderDash:[5,3],tension:0.3,pointRadius:0,borderWidth:1.5,spanGaps:true,datalabels:{display:false}}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{x:{ticks:{color:tc,font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{color:gc}},
+           y:{min:20,max:35,ticks:{color:tc,font:{size:10},callback:v=>v+'%'},grid:{color:gc}}  }}});
+
+new Chart(document.getElementById('poFuncChart'),{type:'bar',data:{labels:['SUPPLY CHAIN','QA','OPS','PandE','Supply Chain','SALES','SPS RISK','CPM','GTS'],datasets:[
+  {label:'$',data:[3.77,1.18,0.67,0.51,0.31,0.07,0.06,0.04,0.02],backgroundColor:'#4A3FBF',xAxisID:'xD',
+    datalabels:{display:ctx=>ctx.dataIndex<4,anchor:'end',align:'right',color:'#4A3FBF',font:{size:9,weight:'500'},formatter:v=>'$'+v+'M'}},
+  {label:'Lines',data:[1072,600,413,556,31,39,25,36,8],backgroundColor:'rgba(61,170,132,0.80)',xAxisID:'xL',
+    datalabels:{display:ctx=>ctx.dataIndex<4,anchor:'end',align:'right',color:'#0F6E56',font:{size:9},formatter:v=>v+' lines'}}
+]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}},
+           xD:{position:'bottom',ticks:{color:'#4A3FBF',font:{size:9},callback:v=>'$'+v+'M'},grid:{color:gc}},
+           xL:{position:'top',ticks:{color:'#0F6E56',font:{size:9},callback:v=>v},grid:{display:false}}  }}});
+
+const psc=['#C0392B','#E07050','#E07050','#185FA5','#185FA5','#185FA5','#185FA5','#185FA5','#185FA5','#185FA5'];
+new Chart(document.getElementById('poSiteChart'),{type:'bar',data:{labels:['Engines','Sky Harbor RandO','Tempe','ARDC','Torrance','Rocky Mount','Toronto','Mexicali','SARL','Olomouc'],datasets:[
+  {label:'PO Past Due $',data:[2.805,0.702,0.535,0.383,0.337,0.276,0.274,0.258,0.149,0.104],backgroundColor:psc,
+    datalabels:{anchor:'end',align:'right',color:ctx=>psc[ctx.dataIndex],font:{size:9,weight:'500'},formatter:v=>'$'+Math.round(v*1000)+'K'}}
+]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{y:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},
+           x:{ticks:{color:tc,font:{size:9},callback:v=>'$'+v+'M'},grid:{color:gc}}  }}});
+
+new Chart(document.getElementById('binFuncChart'),{type:'bar',data:{labels:['SUPPLY CHAIN','PandE','QA','OPS','CPM','Supply Chain','SPS RISK','SALES'],datasets:[
+  {label:'$',data:[625.3,185.4,230.4,166.9,5.1,39.0,2.6,0.5],backgroundColor:'#4A3FBF',xAxisID:'xD',
+    datalabels:{anchor:'end',align:'right',color:'#4A3FBF',font:{size:9,weight:'500'},formatter:v=>'$'+v+'K'}},
+  {label:'Lines',data:[933,427,234,231,31,20,5,2],backgroundColor:'rgba(61,170,132,0.80)',xAxisID:'xL',
+    datalabels:{anchor:'end',align:'right',color:'#0F6E56',font:{size:9},formatter:v=>v+' lines'}}
+]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}},
+           xD:{position:'bottom',ticks:{color:'#4A3FBF',font:{size:9},callback:v=>'$'+v+'K'},grid:{color:gc}},
+           xL:{position:'top',ticks:{color:'#0F6E56',font:{size:9},callback:v=>v},grid:{display:false}}  }}});
+
+new Chart(document.getElementById('binSiteChart'),{type:'bar',data:{labels:['Sky Harbor RandO','Tempe','Engines','Raunheim','Torrance','Rocky Mount','Hill AFB','Mexicali','Engines Kitting','Urbana'],datasets:[
+  {label:'Lines',data:[489,304,212,206,123,118,116,109,87,65],backgroundColor:'rgba(186,117,23,0.78)',
+    datalabels:{anchor:'end',align:'right',color:'#854F0B',font:{size:9,weight:'500'},formatter:v=>v+' lines'}}
+]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{}},
+  scales:{y:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},
+           x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}  }}});
 </script>
-
 </body>
 </html>
